@@ -33,14 +33,16 @@ app.post('/subscribe', (req: Request, res: Response) => {
     subscribedAt: new Date()
   });
 
-  const payload = JSON.stringify({ title: 'Hello world !', body: 'My super message content!' });
+  const payload = JSON.stringify({ title: 'Welcome', body: 'You just subscribed to the series feed!' });
 
   webpush.sendNotification(subscription, payload).catch(err => console.error(err));
 
 });
 
-
 // execute every friday at 19:00
 schedule.scheduleJob({hour: 19, minute: 0, dayOfWeek: 5}, () => {
-  checkForNewSeries();
+  checkForNewSeries().then(response => {
+    console.log(response);
+    // TODO: send notifications
+  });
 });
