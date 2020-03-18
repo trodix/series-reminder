@@ -1,10 +1,20 @@
+const socket = io.connect('http://localhost:5000');
 const publicVapidKey = 'BI0swuR9NOxOG_ABmFJ8J3526CMVYT5N2db1m9-sQepLNBB-CltDAhskzpKvYCRtfRvWlizwhsvHfYYkPQ0yCt4';
+const subscribeBtn = document.querySelector('#subscribe');
 
-if ('serviceWorker' in navigator) {
-    send().catch(err => console.error(err));
-}
 
-async function send() {
+subscribeBtn.addEventListener('click', (e) => {
+    if ('serviceWorker' in navigator) {
+        console.log('subscription handled');
+        subscribe().then(subscription => {
+            socket.emit('subscribe', subscription);
+        });
+    } else {
+        console.error('can not subscribe, service worker is not availlable.')
+    }
+});
+
+async function subscribe() {
     const register = await navigator.serviceWorker.register('./js/worker.js', {
         scope: '/js/'
     });
@@ -12,14 +22,7 @@ async function send() {
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
     });
-
-    await fetch('/subscribe', {
-        method: 'POST',
-        body: JSON.stringify(subscription),
-        headers: {
-            'content-type': 'application/json'
-        }
-    });
+    return subscription;
 }
 
 function urlBase64ToUint8Array(base64String) {
@@ -35,4 +38,4 @@ function urlBase64ToUint8Array(base64String) {
       outputArray[i] = rawData.charCodeAt(i);
     }
     return outputArray;
-  }
+}
